@@ -1,0 +1,346 @@
+---
+Title: Happiness Vs Alcohol consumption
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# 1. PROBLEM STATEMENT:-
+1. The aim of this project is to investigate whether there is a relationship between happiness, alcohol consumption and GDP for countries across the world.
+2. To study does alcohol consumption have a direct effect on happiness, irrelevant of country or location. If not, then what other factors in the data set have a relationship with the Happiness score?
+
+# 2. OBJECTIVE:-
+1. Look at the Happiness Scores
+2. Look at the Human Development Index (HDI)
+3. Look at the GDP PerCapita
+4. Look at the Alcohol consumption per Capita
+5. Find relationship between happiness and alcohol consumption
+6. Find relationship between happiness and other factors in data set.
+
+# BACKGROUND OF DATA SET:-
+1. This data was collected from 122 countries across the world during 2016. Measured variables included alcohol consumption (for beer, wine and spirits individually) measured as liters consumed per average person, the Happiness Score (an index ranging from 0 to 10), and GDP (gross domestic production) percapita.
+2. Countries with higher GDP are exponentially higher in their Happiness Scores. 
+
+# DATA DESCRIPTION:-
+1.Country - Name of the Country
+2.Region - Region the country belongs to
+3.Hemisphere - Hemisphere of country
+4.Happiness Score - A metric measured in 2016 by asking the sampled people the question: “How would you rate your happiness on a scale of 0 to 10 where 10 is the happiest”
+5.HDI - Human Development Index by United Nations Development Program(Life expectancy + Education + standard of living)
+6.GDP_PerCapita - Gross Domestic Product index
+7.Beer_PerCapita - Liters (per capita) of beer consumption
+8.Spirit_PerCapita - Liters (per capita) of spirit consumption
+9.Wine_PerCapita - Liters (per capita) of wine consumption
+
+# Loading the data set:-
+```{r}
+df <- read.csv("C:\\Users\\manis\\Desktop\\D21022-D21033 AML Dataset.csv",header=TRUE)
+head(df)
+```
+
+# Exploratory Data Analysis:-
+3. Univariate Analysis
+4. Bivariate Analysis
+5. Anomaly Detection
+6. Missing value imputation
+7. Outlier analysis(If required)
+
+#-------------------------------------------------------------
+## 3. UNIVARIATE ANALYSIS:-
+#-------------------------------------------------------------
+# a. Summary 
+
+```{r}
+summary(df)
+```
+# Observation:
+We have 3 categorical variables Country,Hemisphere and Region. And 6 numeric variables. But note that all these variables are on different scales. For eg:- Happiness score ranges from 0-10 ,where as Beer consumption is in liters. We have to standardize these variables to eliminate any type of bias. 
+
+# Summary of happiness score
+```{r}
+summary(df$HappinessScore)
+```
+# Observation:
+Least happiness score is 3.069 and Highest is 7.526. Let us find which are those countries having least and highest happiness score and let's see if we can find a relationship of them with Alcohol consumption. 
+
+# Finding out max and min happiness score  
+```{r}
+high = subset(df,df$HappinessScore == max(df$HappinessScore))
+low = subset(df,df$HappinessScore == min(df$HappinessScore))
+print(high)
+print(low)
+```
+# Observation: 
+Looking at this Syria has lowest happiness score and Denmark has highest. Let's see if these countries consume more alcohol or less. 
+
+# Finding out alcohol consumption in Denmark
+```{r}
+subset(df$Beer_PerCapita,df$Country == 'Denmark')
+subset(df$Spirit_PerCapita,df$Country == 'Denmark')
+subset(df$Wine_PerCapita,df$Country == 'Denmark')
+```
+# Observation:
+Looks like wine is consumed more in Denmark than other alcohols.
+
+# Finding out alcohol consumption in Syria
+```{r}
+subset(df$Beer_PerCapita,df$Country == 'Syria')
+subset(df$Spirit_PerCapita,df$Country == 'Syria')
+subset(df$Wine_PerCapita,df$Country == 'Syria')
+```
+# observation:
+Syria doesn't seem to be consuming alot of alcohol. This could be the reason for lowest happines score. 
+
+# Take Away:
+1. For all the countries listed in this dataset, the lowest Happiness Score was obtained by Syria with a score of (3.06) and the highest was found to be Denmark with a score of (7.526).
+2. By looking at the overall structure of the data, the average Happiness Score was 5.525 with an interquartile range of 1.949.
+3. Alcohol consumption in Denmark was highest for wine.The other alcohol types was significantly higher than alcohol consumption in Syria.This may be due to the different drinking laws in the countries, as there is no age restriction for the consumption of alcohol in Denmark, while the legal drinking age for Syria is 21. From this comparison between the least and most happy countries there is evidence that greater alcohol consumption is correlated with increasing happiness.
+
+# Let's find out which country consumes most amount of alcohol and plot their happiness score. 
+
+```{r}
+df$total_alcohol <- df$Beer_PerCapita + df$Spirit_PerCapita + df$Wine_PerCapita 
+```
+```{r}
+subset(df,df$total_alcohol == max(df$total_alcohol))
+```
+# Observation:
+Czech Republic consumes most amount of alcohol with happiness score as 6.596. Now the reason for consumption of most alcohol could be that cities in Czech republic are tourist destinations and also has extreme cold weather which could be one of the reasons for maximum consumption of alcohol.
+
+Still we cannot comment on Happiness score without considering GDP and HDI in account. 
+
+# Let's find the country having highest and lowest HDI 
+```{r}
+df_hdi = subset(df,df$HDI==max(df$HDI))
+df_hdi1 = subset(df,df$HDI==min(df$HDI))
+print(df_hdi1)
+print(df_hdi)
+```
+# observation:
+Norway has highest HDI. Also, there happiness score is good. 
+whereas Niger has the lowest HDI with low Happiness score. 
+
+# Country having highest and lowest GDP
+```{r}
+df_gdp = subset(df,df$GDP_PerCapita==max(df$GDP_PerCapita))
+df_gdp1 = subset(df,df$GDP_PerCapita==min(df$GDP_PerCapita))
+print(df_gdp)
+print(df_gdp1)
+```
+# Observation:
+Senegal has the highest GDP but not very good happiness score. Also, Zimbabwe has least GDP but it has similar happiness score as Senegal. Which implies that both GDP and Happiness score are not correlated. 
+
+# b. Frequency Table
+
+```{r}
+table(df$HappinessScore)
+```
+# Observation:-
+
+# c. Graphs
+
+# a. Plotting Boxplot & Histogram numeric variables
+```{r}
+for(i in 1:ncol(df))
+  {
+    if(is.numeric(df[,i]))
+    {
+      par(mfrow=c(2,1))
+      boxplot(df[,i],main=paste("Boxplot of",names(df)[i]),xlab=names(df)[i] ,horizontal = T, col = 'gold')
+          
+      hist(df[,i],main=paste("Histogram of",names(df)[i]),xlab=names(df)[i],col = 'gold')
+      
+    }
+  }
+```
+# Observation:-
+It looks like very few of country that actually has high GDP_PerCapita, also for spirit_PerCapita and wine_PerCapita. i’m afraid some of them will be assume as outlier. Good thing is, Our target variable HappinessScore has normal distribution.
+
+# b.Plotting GDP
+```{r}
+boxplot(df$GDP_PerCapita)
+```
+# Observation:
+Looks like GDP has many outliers. In next section, we will look into it and solve it. 
+
+#-------------------------------------------------------------
+# 4. BIVARIATE ANALYSIS:- 
+#-------------------------------------------------------------
+
+#1. Scatter plot
+
+# a.Plotting GDP Vs Happiness score
+```{r}
+plot(x=df$GDP_PerCapita,y = df$HappinessScore)
+```
+# Observation:
+There seems to be no relationship between GDP and Happiness 
+This is because GDP value was nominal values, we have to transform them to real values, and R is taking it as a numeric variable. Let's convert GDP to a factor and then plot the graph again. 
+
+```{r}
+df$GDP_PerCapita <- as.factor(df$GDP_PerCapita)
+class(df$GDP_PerCapita)
+```
+
+#Replotting after converting GDP as factor
+```{r}
+plot(x=df$GDP_PerCapita,y = df$HappinessScore)
+```
+#Observation:- 
+The graph seems to have a linear trend. This implies GDP can also be a reason for happiness scores to be high. 
+
+# b. Plotting HDI VS Happiness Score
+```{r}
+plot(x=df$HDI,y = df$HappinessScore)
+```
+#Observation:
+There is a linear trend.. with increase in HDI, happiness score is also increasing. 
+
+# c. Plotting Total alcohol consumption Vs HDI
+```{r}
+df$total_alcohol <- df$Beer_PerCapita + df$Spirit_PerCapita + df$Wine_PerCapita 
+View(df)
+```
+
+```{r}
+plot(x=df$HDI,y=df$total_alcohol)
+```
+#Observation:
+As per the graph, as HDI increases total alcohol consumption seems to be increasing. Which means if life expectancy,literacy rate and standards of living are increasing, the alcohol is consumed more. 
+While in case of Syria, HDI is low so is alcohol consumption. As Syria is an Islamic country it consumes less to no alcohol and also due to on going wars in Syria the HDI, GDP is low. Which makes it hard to compare happiness with alcohol in this particular case. 
+
+# d. Plotting Total Alcohol consumption Vs Happiness score 
+```{r}
+plot(x=df$total_alcohol,y=df$HappinessScore)
+```
+#Observation:
+There seems to be no linear trend which implies alcohol could be or could not be a reason for increase in happiness score. 
+
+# e.Plotting side by side box plot
+```{r}
+boxplot(df$HappinessScore,df$HDI,df$Beer_PerCapita)
+```
+# Observation:-
+Since all three of the variables are on different scales, we cannot infer any results from this.
+We need to standardize the variables and re-plot them to study their behavior.
+
+#2. Correlation Matrix 
+
+```{r}
+df_num = df[,c('HappinessScore','HDI','Beer_PerCapita','Spirit_PerCapita','Wine_PerCapita')]
+df_num
+```
+
+
+```{r}
+cor_matrix <- cor(df_num)
+round(cor_matrix,2)
+```
+# Observation:
+By this there is high positive correlation between HDI and Happiness score. Moving forward we will make our assumptions based on this fact. 
+
+```{r}
+library(GGally)
+ggcorr(df,label=T, layout.exp=2, hjust= 1)
+```
+
+# Observation:
+From the plot above, there is a high positive correlation between HDI and Happiness score and between BeerPerCapita vs Happiness score. This will help us moving forward with our assumptions.
+
+#-----------------------------------------------------------
+# 5. ANOMALY DETECTION:-
+#-----------------------------------------------------------
+There were no anomalies in our dataset. Hence we skipped this step. 
+
+#-------------------------------------------------------------
+# 6. MISSING VALUE IMPUTATION
+#-------------------------------------------------------------
+
+#Checking for Null Values
+```{r}
+is.null(df)
+```
+#Observation: 
+There are no null values present in the dataset
+
+
+#-------------------------------------------------------------
+# 7. OUTLIER ANALYSIS
+#-------------------------------------------------------------
+# 1. GDP
+```{r}
+outlier_values <- boxplot.stats(df$GDP_PerCapita)$out
+#outlier values.
+boxplot(df$GDP_PerCapita, main="GDP", boxwex=0.1)
+mtext(paste("Outliers: ", paste(outlier_values, collapse=", ")), cex=0.6)
+```
+# Observation:- 
+Looks like the column GDP has no outliers. 
+
+```{r}
+for(i in 1:ncol(df))
+  {
+    if(is.numeric(df[,i]))
+    {
+      outlier_values <- boxplot.stats(df[,i])$out
+# outlier values.
+      boxplot(df[,i], main=paste("Boxplot of",names(df)[i]),   boxwex=0.1)
+      mtext(paste("Outliers: ", paste(outlier_values, collapse=", ")), cex=0.6)
+      
+    }
+  }
+```
+#Observation:- 
+Wine_perCaptia looks like it has some outliers. Using capping technique to handle the outliers. 
+
+# Capping those outliers 
+```{r}
+qnt <- quantile(df$Wine_PerCapita, probs=c(.25, .75), na.rm = T)
+caps <- quantile(df$Wine_PerCapita, probs=c(.05, .95), na.rm = T)
+H <- 1.5 * IQR(df$Wine_PerCapita, na.rm = T)
+df$Wine_PerCapita[df$Wine_PerCapita < (qnt[1] - H)] <- caps[1]
+df$Wine_PerCapita[df$Wine_PerCapita > (qnt[2] + H)] <- caps[2]
+```
+# Checking after capping
+```{r}
+outlier_values <- boxplot.stats(df$Wine_PerCapita)$out
+# outlier values.
+boxplot(df$Wine_PerCapita, main="Wine_perCapita", boxwex=0.1)
+mtext(paste("Outliers: ", paste(outlier_values, collapse=", ")), cex=0.6)
+```
+
+# Next step:-
+Model fitting and further analysis is done on Python. 
+We have also considered region column and done one-hot encoding to infer further results. 
+#-------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
